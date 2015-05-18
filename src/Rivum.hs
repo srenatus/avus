@@ -10,9 +10,10 @@ import qualified Config.Dyre.Options as Dyre
 import Config.Dyre.Relaunch
 
 import System.FilePath
-
+import System.Exit (exitSuccess, exitFailure)
 import System.Environment (getArgs)
 import qualified Rivum.CVSS as CVSS
+import qualified Rivum.Scan as Scan
 
 data Config = Config
     { baseUpdate :: FilePath -> CVSS.Base -> IO CVSS.Base
@@ -20,16 +21,23 @@ data Config = Config
     , err :: Maybe String
     }
 
--- readScan = undefined
+realMain :: Config -> IO ()
+realMain Config{ err = Just err } = do
+    putStrLn $ "Error: " ++ err
+    exitFailure
 
-realMain Config{ err = Just err }        = putStrLn $ "realMain here, error: " ++ err
-realMain Config{ baseUpdate, envUpdate } = putStrLn $ "realMain here, all good"
+realMain Config{ baseUpdate, envUpdate } = do
+    [fp] <- getArgs
+    Scan.processData fp return
+    exitSuccess
 
+showError :: Config -> String -> Config
 showError c str = c { err = Just str }
 
+defaultConfig :: Config
 defaultConfig = Config
-    { envUpdate  = \f e -> return e
-    , baseUpdate = \f b -> return b
+    { envUpdate  = \_ e -> return e
+    , baseUpdate = \_ b -> return b
     , err        = Nothing
     }
 
