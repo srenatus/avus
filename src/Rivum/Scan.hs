@@ -1,14 +1,16 @@
-{-# LANGUAGE ScopedTypeVariables, DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings, DeriveGeneric #-}
 module Rivum.Scan
     ( processData
+    , processVuln
     , Vuln
     )where
 
 import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString.Lazy.Char8 as B
 import Prelude hiding (mapM)
 import Data.Foldable (for_)
 import Data.Traversable (mapM)
-import Data.Csv (ToNamedRecord, FromNamedRecord, Header)
+import Data.Csv (ToNamedRecord, FromNamedRecord, Header, encodeByNameWith, defaultEncodeOptions, EncodeOptions(..))
 import Data.Csv.Streaming
 import GHC.Generics
 
@@ -30,10 +32,20 @@ data Vuln = Vuln
 instance FromNamedRecord Vuln
 instance ToNamedRecord Vuln
 
-processData :: FilePath -> (Vuln -> IO Vuln) -> IO (Records Vuln)
+processData :: FilePath -> (Vuln -> IO Vuln) -> IO () -- (Records Vuln)
 processData fp f = do
     csvData <- BL.readFile fp
-    let (Right (_, rs)) = decodeByName csvData :: Either String (Header, Records Vuln)
+    let (Right (hdr, rs)) = decodeByName csvData :: Either String (Header, Records Vuln)
     mapM f rs
-    -- for_ rs $ \x ->
-    --   putStrLn $ (name x) ++ " is " ++ (vuln_id x) ++ " (" ++ (file x) ++ ")"
+    vs <- mapM f rs -- :: Records Vuln
+    for_ vs (\x -> B.putStr $ encodeByNameWith encodeOpts hdr [x]) -- TODO prints header each time!
+  where
+    encodeOpts = defaultEncodeOptions
+        { encUseCrLf       = False
+	, encIncludeHeader = False
+	}
+
+processVuln :: Vuln -> IO Vuln
+processVuln v@(Vuln vid n g cn cwe_id s file p pm l ) = do
+    putStrLn $ vid ++ " is " ++ (show cwe_id) ++ " in " ++ file
+    return (Vuln vid n g cn (cwe_id + 10) s file p pm l)

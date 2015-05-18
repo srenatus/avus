@@ -28,7 +28,7 @@ realMain Config{ err = Just err } = do
 
 realMain Config{ baseUpdate, envUpdate } = do
     [fp] <- getArgs
-    Scan.processData fp return
+    Scan.processData fp Scan.processVuln
     exitSuccess
 
 showError :: Config -> String -> Config
