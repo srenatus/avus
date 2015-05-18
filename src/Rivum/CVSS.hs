@@ -1,5 +1,5 @@
 {-# LANGUAGE NamedFieldPuns #-}
-module CVSS where
+module Rivum.CVSS where
 
 data Av = AvL | AvA | AvN deriving (Eq, Show)
 data Ac = AcH | AcM | AcL deriving (Eq, Show)

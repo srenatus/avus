@@ -1,3 +1,5 @@
+module Main where
+
 import Rivum
 
 main = processScan defaultConfig
