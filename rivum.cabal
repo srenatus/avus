@@ -22,6 +22,7 @@ library
                        Rivum.CVSS
                        Rivum.CWE
                        Rivum.Scan
+                       Rivum.Utils
   other-extensions:    TupleSections
   build-depends:       base >=4.7 && <4.8, containers >=0.5 && <0.6,
                        dyre >=0.8.12,

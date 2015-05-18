@@ -1,6 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Rivum.CVSS where
 
+-- Base
 data Av = AvL | AvA | AvN deriving (Eq, Show)
 data Ac = AcH | AcM | AcL deriving (Eq, Show)
 data Au = AuM | AuS | AuN deriving (Eq, Show)
@@ -44,9 +45,9 @@ defaultBase = Base
     , a  = ImpN
     }
 
-type BaseScore = Float
+type Score = Float
 
-base :: Base -> BaseScore
+base :: Base -> Score
 base (Base { av, ac, au, c, i, a }) = ( 0.6 * imp + 0.4 * exploitability - 1.5 ) * (f imp)
   where
     imp         = impact confImpact integImpact availImpact
@@ -64,6 +65,7 @@ base (Base { av, ac, au, c, i, a }) = ( 0.6 * imp + 0.4 * exploitability - 1.5 )
 impact :: Float -> Float -> Float -> Float
 impact ci ii ai = 10.41 * (1 - (1 - ci) * (1 - ii) * (1 - ai))
 
+-- Env
 data Cdp = CdpND | CdpN | CdpL | CdpLM | CdpMH | CdpH deriving (Eq, Show)
 data Td  = TdND | TdN | TdL | TdM | TdH deriving (Eq, Show)
 data Req = ReqND | ReqL | ReqM | ReqH deriving (Eq, Show)
@@ -106,7 +108,7 @@ defaultEnv = Env
     , ar  = ReqND
     }
 
-env :: Base -> Env -> EnvScore
+env :: Base -> Env -> Score
 env b@(Base { c, i, a})  (Env { cdp, td, cr, ir, ar }) = (adjustedTemporal + (10 - adjustedTemporal) * collateralDamagePotential) * targetDistribution
   where
     adjustedTemporal = base b -- XXX No proper temporal score handling
@@ -119,3 +121,11 @@ env b@(Base { c, i, a})  (Env { cdp, td, cr, ir, ar }) = (adjustedTemporal + (10
     confReq  = fromReq cr
     integReq = fromReq ir
     availReq = fromReq ar
+
+-- NVD classification
+data Severity = Low | Medium | High
+fromScore :: Score -> Severity
+fromScore s
+    | s <= 3.9  = Low
+    | s <= 6.9  = Medium
+    | otherwise = High
