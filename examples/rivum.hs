@@ -1,9 +1,8 @@
-{-# LANGUAGE NamedFieldPuns, TupleSections #-}
+{-# LANGUAGE NamedFieldPuns #-}
 -- module Main where
 import Rivum
 import Rivum.CVSS
 import Rivum.Utils (returnIO)
-import qualified Data.Map.Strict as M
 import System.FilePath
 
 -- Confidentiality, Integrity, Availability
@@ -15,23 +14,17 @@ data Domain = Userland
 	    | Misc
 	      deriving (Eq, Show)
 
-type CodeMap = M.Map FilePath Domain
-
-classify :: FilePath -> CodeMap -> Maybe Domain
-classify = M.lookup
---classify f cm = M.lookup f cm
-
-codeMap :: CodeMap
-codeMap = M.fromList $ concat [userland, kernel, misc]
+classify :: FilePath -> Domain
+classify fp
+  | fp `elem` userland = Userland
+  | fp `elem` misc     = Misc
+  | otherwise          = Kernel
   where
-    userland = map (, Userland) userlandFiles
-    kernel   = map (, Kernel) kernelFiles
-    misc     = map (, Misc) miscFiles
-    userlandFiles = ["cat.c", "echo.c","forktest.c", "grep.c", "kill.c", "ln.c",
-                     "ls.c", "mkdir.c", "mkfs.c", -- "stressfs.c", "usertests.c",
+    userland = ["cat.c", "echo.c","forktest.c", "grep.c", "kill.c", "ln.c",
+                     "ls.c", "mkdir.c", "mkfs.c", "stressfs.c", "usertests.c",
 		     "wc.c", "zombie.c", "rm.c", "printf.c"]
-    kernelFiles   = ["mem.c"] -- TODO
-    miscFiles     = ["sh.c", "init.c"]
+    kernel   = ["mem.c"] -- TODO
+    misc     = ["sh.c", "init.c"]
 
 concept :: SecurityConcept
 concept Userland = Requirements (ReqL, ReqH, ReqL)
@@ -44,10 +37,9 @@ xv6base _ b = b { av = AvL, ac = AcL, au = AuN }
 
 xv6env :: FilePath -> Env -> Env
 xv6env fp e =
-    case classify fp codeMap of
-        Nothing     -> e -- do nothing
-        Just domain -> let Requirements (cr, ir, ar) = concept domain in
-            e { cr, ir, ar }
+    let domain = classify fp
+        Requirements (cr, ir, ar) = concept domain in
+            e { cr, ir, ar } -- TODO: verify that this works
             --e { cr = cr, ir = ir, ar = ar }
 
 xv6Config = defaultConfig
