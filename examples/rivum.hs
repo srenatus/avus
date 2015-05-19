@@ -11,8 +11,8 @@ type SecurityConcept = Domain -> Requirements
 
 data Domain = Userland
             | Kernel
-	    | Misc
-	      deriving (Eq, Show)
+            | Misc
+            deriving (Eq, Show)
 
 classify :: FilePath -> Maybe Domain
 classify fp

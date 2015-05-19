@@ -24,7 +24,7 @@ library
                        Rivum.Scan
                        Rivum.Utils
   other-extensions:    TupleSections
-  build-depends:       base >=4.7 && <4.8, containers >=0.5 && <0.6,
+  build-depends:       base >=4 && <5, containers >=0.5 && <0.6,
                        dyre >=0.8.12,
                        filepath >= 1.4.0.0,
                        cassava >= 0.4.2.3,
@@ -36,7 +36,7 @@ executable rivum
   --main-is:             Rivum.hs
   -- other-modules:       
   other-extensions:    TupleSections
-  build-depends:       base >=4.7 && <4.8, containers >=0.5 && <0.6,
+  build-depends:       base >=4 && <5, containers >=0.5 && <0.6,
                        dyre >=0.8.12,
                        filepath >= 1.4.0.0,
                        cassava >= 0.4.2.3,

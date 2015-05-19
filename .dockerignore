@@ -1,0 +1,8 @@
+.dockerignore
+Dockerfile
+.cabal-sandbox
+.git
+cache
+examples/cache
+dist
+cabal.sandbox.config
