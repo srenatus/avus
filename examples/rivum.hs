@@ -14,19 +14,19 @@ data Domain = Userland
 	    | Misc
 	      deriving (Eq, Show)
 
-classify :: FilePath -> Domain
+classify :: FilePath -> Maybe Domain
 classify fp
-  | fp `elem` userland = Userland
-  | fp `elem` misc     = Misc
-  | otherwise          = Kernel
+  | fp `elem` userland = Just Userland
+  | fp `elem` misc     = Just Misc
+  | fp `elem` drop     = Nothing
+  | otherwise          = Just Kernel
   where
-    userland = ["cat.c", "echo.c","forktest.c", "grep.c", "kill.c", "ln.c",
-                     "ls.c", "mkdir.c", "mkfs.c", "stressfs.c", "usertests.c",
-		     "wc.c", "zombie.c", "rm.c", "printf.c"]
-    kernel   = ["mem.c"] -- TODO
+    userland = ["cat.c", "echo.c", "grep.c", "kill.c", "ln.c", "ls.c",
+                "mkdir.c", "mkfs.c", "wc.c", "zombie.c", "rm.c", "printf.c"]
     misc     = ["sh.c", "init.c"]
+    drop     = ["stressfs.c", "usertests.c", "forktest.c"]
 
-concept :: SecurityConcept
+concept :: SecurityConcept -- TODO: correct values
 concept Userland = Requirements (ReqL, ReqH, ReqL)
 concept Misc     = Requirements (ReqL, ReqH, ReqL)
 concept Kernel   = Requirements (ReqL, ReqH, ReqL)
@@ -37,8 +37,9 @@ xv6base _ b = b { av = AvL, ac = AcL, au = AuN }
 
 xv6env :: FilePath -> Env -> Env
 xv6env fp e =
-    let domain = classify fp
-        Requirements (cr, ir, ar) = concept domain in
+    case classify fp of
+        Nothing     -> e -- identity
+        Just domain -> let Requirements (cr, ir, ar) = concept domain in
             e { cr, ir, ar } -- TODO: verify that this works
             --e { cr = cr, ir = ir, ar = ar }
 
