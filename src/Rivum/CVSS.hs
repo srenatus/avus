@@ -182,3 +182,8 @@ fromScore s
     | s <= 3.9  = Low
     | s <= 6.9  = Medium
     | otherwise = High
+
+fromSeverity :: Severity -> String
+fromSeverity Low = "low"
+fromSeverity Medium = "medium"
+fromSeverity High = "high"

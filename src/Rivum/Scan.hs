@@ -15,6 +15,7 @@ import Data.Csv.Streaming
 import GHC.Generics
 
 import qualified Rivum.CWE as CWE
+import qualified Rivum.CVSS as CVSS
 
 data Vuln = Vuln
     { vuln_id   :: String
@@ -32,20 +33,32 @@ data Vuln = Vuln
 instance FromNamedRecord Vuln
 instance ToNamedRecord Vuln
 
-processData :: FilePath -> (Vuln -> IO Vuln) -> IO () -- (Records Vuln)
+processData :: FilePath  -- scan file
+	    -> (Vuln -> IO Vuln)
+	    -> IO () -- (Records Vuln)
 processData fp f = do
     csvData <- BL.readFile fp
     let (Right (hdr, rs)) = decodeByName csvData :: Either String (Header, Records Vuln)
     mapM f rs
     vs <- mapM f rs -- :: Records Vuln
-    for_ vs (\x -> B.putStr $ encodeByNameWith encodeOpts hdr [x]) -- TODO prints header each time!
+    for_ vs (\x -> B.putStr $ encodeByNameWith encodeOpts hdr [x])
+    putStrLn "done"
   where
     encodeOpts = defaultEncodeOptions
         { encUseCrLf       = False
 	, encIncludeHeader = False
 	}
 
-processVuln :: Vuln -> IO Vuln
-processVuln v@(Vuln vid n g cn cwe_id s file p pm l ) = do
-    putStrLn $ vid ++ " is " ++ (show cwe_id) ++ " in " ++ file
-    return (Vuln vid n g cn (cwe_id + 10) s file p pm l)
+processVuln :: (FilePath -> CVSS.Base -> IO CVSS.Base)
+            -> (FilePath -> CVSS.Temp -> IO CVSS.Temp)
+            -> (FilePath -> CVSS.Env -> IO CVSS.Env)
+            -> Vuln
+	    -> IO Vuln
+processVuln baseUpdate tempUpdate envUpdate v@(Vuln vid n g cn cweId s file p pm l ) = do
+    base <- baseUpdate file $ CWE.cweImpact cweId CVSS.defaultBase
+    temp <- tempUpdate file CVSS.defaultTemp
+    env  <- envUpdate file CVSS.defaultEnv
+    let score    = CVSS.env base temp env
+        severity = CVSS.fromSeverity $ CVSS.fromScore score
+    -- putStrLn $ vid ++ " is " ++ (show cweId) ++ " in " ++ file ++ " and has " ++ severity
+    return (Vuln vid n g cn cweId severity file p pm l)

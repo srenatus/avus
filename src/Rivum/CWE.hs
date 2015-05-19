@@ -1,7 +1,10 @@
-module Rivum.CWE where
+module Rivum.CWE 
+    ( Id
+    , cweImpact
+    ) where
 
 import Data.List (elem)
-import Rivum.CVSS
+import Rivum.CVSS (Base(..), Imp(..))
 
 type Id = Int
 
