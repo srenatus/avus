@@ -26,10 +26,10 @@ classify fp
     misc     = ["sh.c", "init.c"]
     drop     = ["stressfs.c", "usertests.c", "forktest.c"]
 
-concept :: SecurityConcept -- TODO: correct values
-concept Userland = Requirements (ReqL, ReqH, ReqL)
-concept Misc     = Requirements (ReqL, ReqH, ReqL)
-concept Kernel   = Requirements (ReqL, ReqH, ReqL)
+concept :: SecurityConcept -- NB: this is dom_config1 for findings w/ dupes
+concept Userland = Requirements (ReqL, ReqL, ReqL)
+concept Misc     = Requirements (ReqL, ReqL, ReqL)
+concept Kernel   = Requirements (ReqL, ReqL, ReqM)
 
 -- ignores the filepath, sets project-level parameters
 xv6base :: FilePath -> Base -> Base
