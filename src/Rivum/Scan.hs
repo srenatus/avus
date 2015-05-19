@@ -22,7 +22,7 @@ data Vuln = Vuln
     , name      :: String
     , garbage   :: String
     , cwe_name  :: String
-    , cwe_id    :: CWE.Id
+    , cwe_id    :: Maybe CWE.Id
     , severity  :: String
     , file      :: FilePath
     , path      :: FilePath
@@ -54,11 +54,12 @@ processVuln :: (FilePath -> CVSS.Base -> IO CVSS.Base)
             -> (FilePath -> CVSS.Env -> IO CVSS.Env)
             -> Vuln
 	    -> IO Vuln
-processVuln baseUpdate tempUpdate envUpdate v@(Vuln vid n g cn cweId s file p pm l ) = do
+processVuln baseUpdate tempUpdate envUpdate v@(Vuln vid n g cn (Just cweId) s file p pm l ) = do
     base <- baseUpdate file $ CWE.cweImpact cweId CVSS.defaultBase
     temp <- tempUpdate file CVSS.defaultTemp
     env  <- envUpdate file CVSS.defaultEnv
     let score    = CVSS.env base temp env
         severity = CVSS.fromSeverity $ CVSS.fromScore score
     -- putStrLn $ vid ++ " is " ++ (show cweId) ++ " in " ++ file ++ " and has " ++ severity
-    return (Vuln vid n g cn cweId severity file p pm l)
+    return (Vuln vid n g cn (Just cweId) severity file p pm l)
+processVuln _ _ _ v = return v
