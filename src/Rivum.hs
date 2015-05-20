@@ -32,6 +32,9 @@ realMain Config{ baseUpdate, tempUpdate, envUpdate } = do
     Scan.processData fp $ Scan.processVuln baseUpdate tempUpdate envUpdate
     exitSuccess
 
+-- |
+-- >>> err $ showError defaultConfig "foo"
+-- Just "foo"
 showError :: Config -> String -> Config
 showError c str = c { err = Just str }
 
