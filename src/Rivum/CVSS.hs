@@ -1,7 +1,8 @@
 {-# LANGUAGE NamedFieldPuns #-}
 module Rivum.CVSS where
 
-type Score = Float
+import Data.Decimal (Decimal, roundTo)
+type Score = Decimal
 
 -- Base
 data Av = AvL | AvA | AvN deriving (Eq, Show)
@@ -9,22 +10,22 @@ data Ac = AcH | AcM | AcL deriving (Eq, Show)
 data Au = AuM | AuS | AuN deriving (Eq, Show)
 data Imp = ImpN | ImpP | ImpC deriving (Eq, Show)
 
-fromAv :: Av -> Float
+fromAv :: Av -> Decimal
 fromAv AvL = 0.395
 fromAv AvA = 0.646
 fromAv AvN = 1.0
 
-fromAc :: Ac -> Float
+fromAc :: Ac -> Decimal
 fromAc AcH = 0.35
 fromAc AcM = 0.61
 fromAc AcL = 0.71
 
-fromAu :: Au -> Float
+fromAu :: Au -> Decimal
 fromAu AuM = 0.45
 fromAu AuS = 0.56
 fromAu AuN = 0.704
 
-fromImp :: Imp -> Float
+fromImp :: Imp -> Decimal
 fromImp ImpN = 0.0
 fromImp ImpP = 0.275
 fromImp ImpC = 0.660
@@ -47,16 +48,14 @@ defaultBase = Base
     , a  = ImpN
     }
 
-baseByImp :: Float -> Base -> Score
-baseByImp imp (Base { av, ac, au }) = ( 0.6 * imp + 0.4 * exploitability - 1.5 ) * (f imp)
+baseByImp :: Decimal -> Base -> Score
+baseByImp imp (Base { av, ac, au }) = roundTo 1 $ ( 0.6 * imp + 0.4 * exploitability - 1.5 ) * (f imp)
   where
     exploitability = 20 * accessVector * accessComplexity * authentication
     accessVector     = fromAv av
     accessComplexity = fromAc ac
     authentication   = fromAu au
     f x = if x == 0.0 then 0.0 else 1.176
-    --round_to_one_decimal x =  (fromInteger $ round $ x * 10) / 10.0
-    -- TODO
 
 base :: Base -> Score
 base b@(Base { c, i, a }) = baseByImp imp b
@@ -66,7 +65,7 @@ base b@(Base { c, i, a }) = baseByImp imp b
     integImpact = fromImp i
     availImpact = fromImp a
 
-impact :: Float -> Float -> Float -> Float
+impact :: Decimal -> Decimal -> Decimal -> Decimal
 impact ci ii ai = 10.41 * (1 - (1 - ci) * (1 - ii) * (1 - ai))
 
 -- Temp
@@ -74,21 +73,21 @@ data E = END | EU | EPOC | EF | EH deriving (Eq, Show)
 data Rl = RlND | RlOF | RlTF | RlW | RlU deriving (Eq, Show)
 data Rc = RcND | RcUC | RcUR | RcC deriving (Eq, Show)
 
-fromE :: E -> Float
+fromE :: E -> Decimal
 fromE END  = 1.0
 fromE EU   = 0.85
 fromE EPOC = 0.9
 fromE EF   = 0.95
 fromE EH   = 1.0
 
-fromRl :: Rl -> Float
+fromRl :: Rl -> Decimal
 fromRl RlND = 1.0
 fromRl RlOF = 0.87
 fromRl RlTF = 0.9
 fromRl RlW  = 0.95
 fromRl RlU  = 1.0
 
-fromRc :: Rc -> Float
+fromRc :: Rc -> Decimal
 fromRc RcND = 1.0
 fromRc RcUC   = 0.9
 fromRc RcUR = 0.95
@@ -107,7 +106,7 @@ defaultTemp = Temp
     }
 
 tempByBase :: Score -> Temp -> Score
-tempByBase baseScore (Temp {e, rl, rc}) = baseScore * exploitability * remediationLevel * reportConfidence
+tempByBase baseScore (Temp {e, rl, rc}) = roundTo 1 $ baseScore * exploitability * remediationLevel * reportConfidence
   where
     exploitability = fromE e
     remediationLevel = fromRl rl
@@ -123,7 +122,7 @@ data Cdp = CdpND | CdpN | CdpL | CdpLM | CdpMH | CdpH deriving (Eq, Show)
 data Td  = TdND | TdN | TdL | TdM | TdH deriving (Eq, Show)
 data Req = ReqND | ReqL | ReqM | ReqH deriving (Eq, Show)
 
-fromCdp :: Cdp -> Float
+fromCdp :: Cdp -> Decimal
 fromCdp CdpND = 0.0
 fromCdp CdpN  = 0.0
 fromCdp CdpL  = 0.1
@@ -131,19 +130,19 @@ fromCdp CdpLM = 0.3
 fromCdp CdpMH = 0.4
 fromCdp CdpH  = 0.5
 
-fromTd :: Td -> Float
+fromTd :: Td -> Decimal
 fromTd TdND = 1.0
 fromTd TdL  = 0.25
 fromTd TdM  = 0.75
 fromTd TdH  = 1.0
 
-fromReq :: Req -> Float
+fromReq :: Req -> Decimal
 fromReq ReqND = 1.0
 fromReq ReqL  = 0.5
 fromReq ReqM  = 1.0
 fromReq ReqH  = 1.51
 
-type EnvScore = Float
+type EnvScore = Decimal
 
 data Env = Env
     { cdp :: Cdp
@@ -162,7 +161,7 @@ defaultEnv = Env
     }
 
 env :: Base -> Temp -> Env -> Score
-env b@(Base { c, i, a}) t  (Env { cdp, td, cr, ir, ar }) = (adjustedTemporal + (10 - adjustedTemporal) * collateralDamagePotential) * targetDistribution
+env b@(Base { c, i, a}) t  (Env { cdp, td, cr, ir, ar }) = roundTo 1 $ (adjustedTemporal + (10 - adjustedTemporal) * collateralDamagePotential) * targetDistribution
   where
     adjustedTemporal = tempByBase (baseByImp adjustedImpact b) t
     adjustedImpact = minimum [10.0, impact (confImpact*confReq) (integImpact*integReq) (availImpact*availReq)]
