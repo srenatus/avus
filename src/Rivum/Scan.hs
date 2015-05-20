@@ -34,8 +34,8 @@ instance FromNamedRecord Vuln
 instance ToNamedRecord Vuln
 
 processData :: FilePath  -- scan file
-	    -> (Vuln -> IO Vuln)
-	    -> IO () -- (Records Vuln)
+            -> (Vuln -> IO Vuln)
+            -> IO () -- (Records Vuln)
 processData fp f = do
     csvData <- BL.readFile fp
     let (Right (hdr, rs)) = decodeByName csvData :: Either String (Header, Records Vuln)
@@ -46,14 +46,14 @@ processData fp f = do
   where
     encodeOpts = defaultEncodeOptions
         { encUseCrLf       = False
-	, encIncludeHeader = False
-	}
+        , encIncludeHeader = False
+        }
 
 processVuln :: (FilePath -> CVSS.Base -> IO CVSS.Base)
             -> (FilePath -> CVSS.Temp -> IO CVSS.Temp)
             -> (FilePath -> CVSS.Env -> IO CVSS.Env)
             -> Vuln
-	    -> IO Vuln
+            -> IO Vuln
 processVuln baseUpdate tempUpdate envUpdate v@(Vuln vid n g cn (Just cweId) s file p pm l ) = do
     base <- baseUpdate file $ CWE.cweImpact cweId CVSS.defaultBase
     temp <- tempUpdate file CVSS.defaultTemp
