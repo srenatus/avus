@@ -9,7 +9,7 @@ license:             MIT
 license-file:        LICENSE
 author:              Stephan Renatus
 maintainer:          stephan.renatus@aisec.fraunhofer.de
--- copyright:           
+copyright:           (c) 2015 Fraunhofer AISEC
 category:            Security
 build-type:          Simple
 -- extra-source-files:  
