@@ -1,14 +1,66 @@
 {-# LANGUAGE NamedFieldPuns #-}
-module Rivum.CVSS where
+module Rivum.CVSS (
+  -- * Basic types
+    Score
+  , Severity
+  -- * Base scoring
+  , Base(..)
+  , Av(..)
+  , Ac(..)
+  , Au(..)
+  , Imp(..)
+  , base
+  , defaultBase
+  -- * Temp scoring
+  , Temp(..)
+  , E(..)
+  , Rl(..)
+  , Rc(..)
+  , temp
+  , defaultTemp
+  -- * Env scoring
+  , Cdp(..)
+  , Td(..)
+  , Req(..)
+  , Env(..)
+  , env
+  , defaultEnv
+  -- * Helper functions
+  , fromScore
+  , fromSeverity
+  ) where
 
 import Data.Decimal (Decimal, roundTo)
+
+-- | Score data type
+--
+-- According to the documentation, the resulting scores are all rounded to one
+-- decimal.
 type Score = Decimal
 
--- Base
-data Av = AvL | AvA | AvN deriving (Eq, Show)
-data Ac = AcH | AcM | AcL deriving (Eq, Show)
-data Au = AuM | AuS | AuN deriving (Eq, Show)
-data Imp = ImpN | ImpP | ImpC deriving (Eq, Show)
+-- | Access vector
+data Av = AvL  -- ^ requires local access
+        | AvA  -- ^ adjacent network access
+        | AvN  -- ^ network accessible
+          deriving (Eq, Show)
+
+-- | Access complexity
+data Ac = AcH  -- ^ high
+        | AcM  -- ^ medium
+        | AcL  -- ^ low
+          deriving (Eq, Show)
+
+-- | Authentication
+data Au = AuM  -- ^ requires multiple instances of authentication
+        | AuS  -- ^ requires single instance of authentication
+        | AuN  -- ^ requires no authentication
+          deriving (Eq, Show)
+
+-- | Impact
+data Imp = ImpN  -- ^ none
+         | ImpP  -- ^ partial
+         | ImpC  -- ^ complete
+           deriving (Eq, Show)
 
 fromAv :: Av -> Decimal
 fromAv AvL = 0.395
@@ -30,15 +82,17 @@ fromImp ImpN = 0.0
 fromImp ImpP = 0.275
 fromImp ImpC = 0.660
 
+-- | Base score configuration
 data Base = Base
-    { av :: Av
-    , ac :: Ac
-    , au :: Au
-    , c  :: Imp
-    , i  :: Imp
-    , a  :: Imp
+    { av :: Av   -- ^ access vector
+    , ac :: Ac   -- ^ access complexity
+    , au :: Au   -- ^ authentication
+    , c  :: Imp  -- ^ confidentiality impact
+    , i  :: Imp  -- ^ integrity impact
+    , a  :: Imp  -- ^ availability impact
     } deriving (Eq, Show)
 
+-- | Default base score configuration
 defaultBase = Base
     { av = AvL
     , ac = AcH
@@ -48,6 +102,7 @@ defaultBase = Base
     , a  = ImpN
     }
 
+-- | Calculate base score given a certain impact
 baseByImp :: Decimal -> Base -> Score
 baseByImp imp (Base { av, ac, au }) = roundTo 1 $ ( 0.6 * imp + 0.4 * exploitability - 1.5 ) * (f imp)
   where
@@ -57,6 +112,10 @@ baseByImp imp (Base { av, ac, au }) = roundTo 1 $ ( 0.6 * imp + 0.4 * exploitabi
     authentication   = fromAu au
     f x = if x == 0.0 then 0.0 else 1.176
 
+-- | Base scoring function
+--
+-- >>> base defaultBase
+-- 0.0
 base :: Base -> Score
 base b@(Base { c, i, a }) = baseByImp imp b
   where
@@ -65,13 +124,33 @@ base b@(Base { c, i, a }) = baseByImp imp b
     integImpact = fromImp i
     availImpact = fromImp a
 
+-- | Calculate combined impact given impacts on confidentiality, integrity, and
+--   availability
 impact :: Decimal -> Decimal -> Decimal -> Decimal
 impact ci ii ai = 10.41 * (1 - (1 - ci) * (1 - ii) * (1 - ai))
 
--- Temp
-data E = END | EU | EPOC | EF | EH deriving (Eq, Show)
-data Rl = RlND | RlOF | RlTF | RlW | RlU deriving (Eq, Show)
-data Rc = RcND | RcUC | RcUR | RcC deriving (Eq, Show)
+-- | Exploitability
+data E = END   -- ^ not defined
+       | EU    -- ^ unproven
+       | EPOC  -- ^ proof-of-concept
+       | EF    -- ^ functional
+       | EH    -- ^ high
+         deriving (Eq, Show)
+
+-- | Remediation level
+data Rl = RlND  -- ^ not defined
+        | RlOF  -- ^ official-fix
+        | RlTF  -- ^ temporary-fix
+        | RlW   -- ^ workaround
+        | RlU   -- ^ unavailable
+          deriving (Eq, Show)
+
+-- | Report confidence
+data Rc = RcND  -- ^ not defined
+        | RcUC  -- ^ unconfirmed
+        | RcUR  -- ^ uncorroborated
+        | RcC   -- ^ confirmed
+          deriving (Eq, Show)
 
 fromE :: E -> Decimal
 fromE END  = 1.0
@@ -93,18 +172,21 @@ fromRc RcUC   = 0.9
 fromRc RcUR = 0.95
 fromRc RcC  = 1.0
 
+-- | Temp score configuration
 data Temp = Temp
     { e  :: E
     , rl :: Rl
     , rc :: Rc
     }
 
+-- | Default temp configuration: not defined
 defaultTemp = Temp
     { e  = END
     , rl = RlND
     , rc = RcND
     }
 
+-- | Temp score given a base score (not base config)
 tempByBase :: Score -> Temp -> Score
 tempByBase baseScore (Temp {e, rl, rc}) = roundTo 1 $ baseScore * exploitability * remediationLevel * reportConfidence
   where
@@ -112,15 +194,38 @@ tempByBase baseScore (Temp {e, rl, rc}) = roundTo 1 $ baseScore * exploitability
     remediationLevel = fromRl rl
     reportConfidence = fromRc rc
 
+-- | Calculate temp score given base config and temp config
+--
+-- >>> temp defaultBase defaultTemp
+-- 0.0
 temp :: Base -> Temp -> Score
 temp b = tempByBase baseScore
   where
     baseScore = base b
 
--- Env
-data Cdp = CdpND | CdpN | CdpL | CdpLM | CdpMH | CdpH deriving (Eq, Show)
-data Td  = TdND | TdN | TdL | TdM | TdH deriving (Eq, Show)
-data Req = ReqND | ReqL | ReqM | ReqH deriving (Eq, Show)
+-- | Collateral damage potential
+data Cdp = CdpND  -- ^ not defined
+         | CdpN   -- ^ none
+         | CdpL   -- ^ low
+         | CdpLM  -- ^ low-medium
+         | CdpMH  -- ^ medium-high
+         | CdpH   -- ^ high
+           deriving (Eq, Show)
+
+-- | Target distribution
+data Td = TdND  -- ^ not defined
+        | TdN   -- ^ none
+        | TdL   -- ^ low
+        | TdM   -- ^ medium
+        | TdH   -- ^ high
+          deriving (Eq, Show)
+
+-- | Requirement (of confidentiality, integrity, or availability)
+data Req = ReqND  -- ^ not defined
+         | ReqL   -- ^ low
+         | ReqM   -- ^ medium
+         | ReqH   -- ^ high
+           deriving (Eq, Show)
 
 fromCdp :: Cdp -> Decimal
 fromCdp CdpND = 0.0
@@ -142,16 +247,16 @@ fromReq ReqL  = 0.5
 fromReq ReqM  = 1.0
 fromReq ReqH  = 1.51
 
-type EnvScore = Decimal
-
+-- | Env score configuration
 data Env = Env
     { cdp :: Cdp
     , td  :: Td
-    , cr  :: Req
-    , ir  :: Req
-    , ar  :: Req
+    , cr  :: Req  -- ^ confidentiality requirement
+    , ir  :: Req  -- ^ integrity requirement
+    , ar  :: Req  -- ^ availability requirement
     } deriving (Eq, Show)
 
+-- | Default Env configuration: not defined
 defaultEnv = Env
     { cdp = CdpND
     , td  = TdND
@@ -160,13 +265,17 @@ defaultEnv = Env
     , ar  = ReqND
     }
 
+-- | Calculate env score given base, temp, and env config
+--
+-- >>> env defaultBase defaultTemp defaultEnv
+-- 0.0
 env :: Base -> Temp -> Env -> Score
 env b@(Base { c, i, a}) t  (Env { cdp, td, cr, ir, ar }) = roundTo 1 $ (adjustedTemporal + (10 - adjustedTemporal) * collateralDamagePotential) * targetDistribution
   where
-    adjustedTemporal = tempByBase (baseByImp adjustedImpact b) t
-    adjustedImpact = minimum [10.0, impact (confImpact*confReq) (integImpact*integReq) (availImpact*availReq)]
+    adjustedTemporal          = tempByBase (baseByImp adjustedImpact b) t
+    adjustedImpact            = minimum [10.0, impact (confImpact*confReq) (integImpact*integReq) (availImpact*availReq)]
     collateralDamagePotential = fromCdp cdp
-    targetDistribution = fromTd td
+    targetDistribution        = fromTd td
     confImpact  = fromImp c
     integImpact = fromImp i
     availImpact = fromImp a
@@ -174,15 +283,18 @@ env b@(Base { c, i, a}) t  (Env { cdp, td, cr, ir, ar }) = roundTo 1 $ (adjusted
     integReq = fromReq ir
     availReq = fromReq ar
 
--- NVD classification
+-- | NVD classification
 data Severity = Low | Medium | High
+
+-- | Convert a Score into a Severity
 fromScore :: Score -> Severity
 fromScore s
     | s <= 3.9  = Low
     | s <= 6.9  = Medium
     | otherwise = High
 
+-- | Convert a Severity in its String representation
 fromSeverity :: Severity -> String
-fromSeverity Low = "low"
-fromSeverity Medium = "medium"
-fromSeverity High = "high"
+fromSeverity Low = "Low"
+fromSeverity Medium = "Medium"
+fromSeverity High = "High"
