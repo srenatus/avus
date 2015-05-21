@@ -12,14 +12,14 @@ type SecurityConcept = Domain -> Requirements
 data Domain = Userland
             | Kernel
             | Misc
-            deriving (Eq, Show)
+              deriving (Eq, Show)
 
 classify :: FilePath -> Maybe Domain
 classify fp
-  | fp `elem` userland = Just Userland
-  | fp `elem` misc     = Just Misc
-  | fp `elem` drop     = Nothing
-  | otherwise          = Just Kernel
+    | fp `elem` userland = Just Userland
+    | fp `elem` misc     = Just Misc
+    | fp `elem` drop     = Nothing
+    | otherwise          = Just Kernel
   where
     userland = ["cat.c", "echo.c", "grep.c", "kill.c", "ln.c", "ls.c",
                 "mkdir.c", "mkfs.c", "wc.c", "zombie.c", "rm.c", "printf.c"]
@@ -35,13 +35,13 @@ concept Kernel   = Requirements (ReqL, ReqL, ReqM)
 xv6base :: FilePath -> Base -> Base
 xv6base _ b = b { av = AvL, ac = AcL, au = AuN }
 
+-- uses the file classification to assign domain-based requirements
 xv6env :: FilePath -> Env -> Env
 xv6env fp e =
     case classify fp of
         Nothing     -> e -- identity
         Just domain -> let Requirements (cr, ir, ar) = concept domain in
-            e { cr, ir, ar } -- TODO: verify that this works
-            --e { cr = cr, ir = ir, ar = ar }
+            e { cr, ir, ar }
 
 xv6Config = defaultConfig
     --{ baseUpdate = \fp b -> return $ xv6base fp b
