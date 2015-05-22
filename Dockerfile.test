@@ -1,0 +1,10 @@
+# build from an image with cabal dependencies installed (saves time)
+FROM rivum:dev
+
+WORKDIR /opt/rivum
+
+# update src and test, run tests
+ADD rivum.cabal /opt/rivum/
+ADD src /opt/rivum/src
+ADD test /opt/rivum/test
+RUN cabal test
