@@ -177,7 +177,7 @@ data Temp = Temp
     { e  :: E
     , rl :: Rl
     , rc :: Rc
-    }
+    } deriving (Eq, Show)
 
 -- | Default temp configuration: not defined
 defaultTemp = Temp
