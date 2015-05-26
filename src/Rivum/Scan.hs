@@ -7,7 +7,7 @@ module Rivum.Scan
 
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Lazy.Char8 as B
-import Prelude hiding (mapM)
+import Prelude hiding (mapM, putStr)
 import Data.Foldable (for_)
 import Data.Traversable (mapM)
 import Data.Csv (ToNamedRecord, FromNamedRecord, Header, encodeByNameWith, defaultEncodeOptions, EncodeOptions(..))
@@ -33,16 +33,29 @@ data Vuln = Vuln
 instance FromNamedRecord Vuln
 instance ToNamedRecord Vuln
 
-processData :: FilePath  -- scan file
+-- | Input helper function
+--   defaults to stdin
+readData :: Maybe FilePath -> IO BL.ByteString
+readData Nothing   = BL.getContents
+readData (Just fp) = BL.readFile fp
+
+-- | Output helper function
+--   defaults to stdout
+putStr :: Maybe FilePath -> BL.ByteString -> IO ()
+putStr Nothing   = B.putStr
+putStr (Just fp) = BL.appendFile fp
+
+processData :: Maybe FilePath  -- input, scan file
+            -> Maybe FilePath  -- output
             -> (Vuln -> IO Vuln)
             -> IO () -- (Records Vuln)
-processData fp f = do
-    csvData <- BL.readFile fp
+processData fp out f = do
+    csvData <- readData fp
     let (Right (hdr, rs)) = decodeByName csvData :: Either String (Header, Records Vuln)
     mapM f rs
     vs <- mapM f rs -- :: Records Vuln
-    for_ vs (\x -> B.putStr $ encodeByNameWith encodeOpts hdr [x])
-    putStrLn "done"
+    for_ vs (\x -> putStr out $ encodeByNameWith encodeOpts hdr [x])
+    -- putStrLn "done"
   where
     encodeOpts = defaultEncodeOptions
         { encUseCrLf       = False
@@ -60,6 +73,5 @@ processVuln baseUpdate tempUpdate envUpdate v@(Vuln vid n g cn (Just cweId) s fi
     env  <- envUpdate file CVSS.defaultEnv
     let score    = CVSS.env base temp env
         severity = CVSS.fromSeverity $ CVSS.fromScore score
-    -- putStrLn $ vid ++ " is " ++ (show cweId) ++ " in " ++ file ++ " and has " ++ severity
     return (Vuln vid n g cn (Just cweId) severity file p pm l)
 processVuln _ _ _ v = return v
