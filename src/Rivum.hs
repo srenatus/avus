@@ -10,6 +10,9 @@ import qualified Config.Dyre.Options as Dyre
 import Config.Dyre.Relaunch
 import Data.Maybe (fromMaybe)
 
+import Paths_rivum (version)
+import Data.Version (showVersion)
+
 import System.FilePath
 import System.Exit (exitSuccess, exitFailure)
 import System.Environment (getArgs)
@@ -23,15 +26,16 @@ import qualified Rivum.Scan as Scan
 data Config = Config
     { baseUpdate :: FilePath -> CVSS.Base -> IO CVSS.Base  -- ^ base
     , tempUpdate :: FilePath -> CVSS.Temp -> IO CVSS.Temp  -- ^ temp
-    , envUpdate :: FilePath -> CVSS.Env -> IO CVSS.Env     -- ^ env
-    , err :: Maybe String                                  -- ^ optional error
+    , envUpdate  :: FilePath -> CVSS.Env -> IO CVSS.Env    -- ^ env
+    , ref        :: Maybe String                           -- ^ optional identifier
+    , err        :: Maybe String                           -- ^ optional error
     }
 
-data Flag = Version | Output (Maybe String) deriving Show
+data Flag = Version | Output (Maybe String) deriving (Eq, Show)
 
 opts :: [OptDescr Flag]
 opts =
-    [ Option ['V'] ["version"] (NoArg Version)      "show version (TODO)"
+    [ Option ['V'] ["version"] (NoArg Version)        "show version information"
     , Option ['o'] ["out"]     (OptArg Output "FILE") "output to FILE (defaults to stdout)"
     ]
 
@@ -47,21 +51,31 @@ findOutput ((Output x):_) = x
 findOutput (_:xs)         = findOutput xs
 findOutput []             = Nothing
 
+outputVersion :: Maybe String -> IO ()
+outputVersion ref = putStr versionString
+  where
+    versionString = (showVersion version) ++ addedRef ref
+    addedRef (Just r) = "/" ++ r
+    addedRef Nothing    = ""
+
 -- Dyre passed an error, print it and exit 1
 realMain :: Config -> IO ()
 realMain Config{ err = Just err } = do
     putStrLn $ "Error: " ++ err
     exitFailure
 
--- TODO: handle version
-realMain Config{ baseUpdate, tempUpdate, envUpdate } = do
+realMain Config{ baseUpdate, tempUpdate, envUpdate, ref } = do
     (flags, fs) <- getOpts =<< getArgs
 
-    let file = if null fs then Nothing else Just $ head fs
-        outfile = findOutput flags
+    if Version `elem` flags
+        then do outputVersion ref
+                exitSuccess
+        else do
+            let file = if null fs then Nothing else Just $ head fs
+                outfile = findOutput flags
 
-    Scan.processData file outfile $ Scan.processVuln baseUpdate tempUpdate envUpdate
-    exitSuccess
+            Scan.processData file outfile $ Scan.processVuln baseUpdate tempUpdate envUpdate
+            exitSuccess
 
 -- |
 -- >>> err $ showError defaultConfig "foo"
@@ -75,6 +89,7 @@ defaultConfig = Config
     { baseUpdate = \_ b -> return b
     , tempUpdate = \_ t -> return t
     , envUpdate  = \_ e -> return e
+    , ref        = Nothing
     , err        = Nothing
     }
 
