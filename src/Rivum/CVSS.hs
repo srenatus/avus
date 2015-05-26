@@ -1,3 +1,4 @@
+-- | CVSS functions
 {-# LANGUAGE NamedFieldPuns #-}
 module Rivum.CVSS (
   -- * Basic types

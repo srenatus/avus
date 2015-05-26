@@ -25,6 +25,14 @@ The mechanism used for this feature is provided by [`Config.Dyre`](http://hackag
 
 Furthermore, it includes a static mapping of CWE IDs (as read from the findings CSV) to partial/complete impacts (in `src/Rivum/CWE.hs`, TODO: autogenerate).
 
+## Usage
+
+```raw
+Usage: rivum [OPTION...] [FILE]
+  -V        --version     show version information
+  -o[FILE]  --out[=FILE]  output to FILE (defaults to stdout)
+```
+
 ## Supported report types
 
 As of now, only the CSV input that is created with [ThreadFix' CLI importer](https://github.com/denimgroup/threadfix/wiki/CLI-Importers) is supported.
