@@ -38,7 +38,7 @@ Usage: rivum [OPTION...] [FILE]
 ## Supported report types
 
 As of now, only the CSV input that is created with [ThreadFix' CLI importer](https://github.com/denimgroup/threadfix/wiki/CLI-Importers) is supported.
-Futhermore, the CSV file needs to be preprocessed (TODO).
+Futhermore, the CSV file needs to be preprocessed (see `examples/prep.awk`).
 The rare entries without a CWE ID are passed through unchanged.
 
 RIVUM is copyright © 2015 Fraunhofer AISEC, and released to the public under the terms of the MIT license.
