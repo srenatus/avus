@@ -1,5 +1,7 @@
 # RIVUM tool
 
+[![Build Status](https://travis-ci.org/srenatus/rivum.svg?branch=travis)](https://travis-ci.org/srenatus/rivum)
+
 This tool allows for re-evaluating a list of vulnerability findings.
 It does that by providing the basic infrastructure for
 
