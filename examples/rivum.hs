@@ -1,9 +1,9 @@
 {-# LANGUAGE NamedFieldPuns #-}
 -- module Main where
-import Rivum
-import Rivum.CVSS
+import Rivum (processScan, defaultConfig, Config(..))
+import Rivum.CVSS (Req(..), Base(..), Env(..), Av(..), Ac(..), Au(..))
 import Rivum.Utils (returnIO)
-import System.FilePath
+import System.FilePath (FilePath)
 
 -- Confidentiality, Integrity, Availability
 data Requirements = Requirements (Req, Req, Req)
@@ -33,7 +33,9 @@ concept Kernel   = Requirements (ReqL, ReqL, ReqM)
 
 -- ignores the filepath, sets project-level parameters
 xv6base :: FilePath -> Base -> Base
-xv6base _ b = b { av = AvL, ac = AcL, au = AuN }
+xv6base _ b = b { av = AvL
+                , ac = AcL
+                , au = AuN }
 
 -- uses the file classification to assign domain-based requirements
 xv6env :: FilePath -> Env -> Env
