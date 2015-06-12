@@ -3,7 +3,7 @@
 import Test.QuickCheck
 import Test.QuickCheck
 import Data.DeriveTH
-import Rivum.CVSS
+import Avus.CVSSv2
 
 $( derive makeArbitrary ''Av )
 $( derive makeArbitrary ''Ac )
