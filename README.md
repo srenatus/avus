@@ -1,4 +1,4 @@
-# RIVUM tool
+# AVUS tool
 
 [![Build Status](https://travis-ci.org/srenatus/rivum.svg)](https://travis-ci.org/srenatus/rivum)
 
@@ -10,27 +10,27 @@ It does that by providing the basic infrastructure for
 3. outputting the resulting list.
 
 ```raw
-               +---+              
-               | ? |              
-               +-+-+              
-                 |                
-                 v                
+               +---+
+               | ? |
+               +-+-+
+                 |
+                 v
 +-----+      +-------+     +-----+
-| CSV | -->  | RIVUM | --> | CSV |
+| CSV | -->  | AVUS  | --> | CSV |
 +-----+      +-------+     +-----+
 ```
 
 The knack is that _anything_ can fill the place of the question mark, i.e., change how findings are evaluated.
-A basic, static example is given in `examples/rivum.hs`, where the parameters of both the base and environment CVSS scoring are determined using a simple security concept.
+A basic, static example is given in `examples/avus.hs`, where the parameters of both the base and environment CVSS scoring are determined using a simple security concept.
 
-The mechanism used for this feature is provided by [`Config.Dyre`](http://hackage.haskell.org/package/dyre) (see `src/Rivum.hs`)
+The mechanism used for this feature is provided by [`Config.Dyre`](http://hackage.haskell.org/package/dyre) (see `src/Avus.hs`)
 
-Furthermore, it includes a static mapping of CWE IDs (as read from the findings CSV) to partial/complete impacts (in `src/Rivum/CWE.hs`, TODO: autogenerate).
+Furthermore, it includes a static mapping of CWE IDs (as read from the findings CSV) to partial/complete impacts (in `src/Avus/CWE.hs`, TODO: autogenerate).
 
 ## Usage
 
 ```raw
-Usage: rivum [OPTION...] [FILE]
+Usage: avus [OPTION...] [FILE]
   -V        --version     show version information
   -o[FILE]  --out[=FILE]  output to FILE (defaults to stdout)
 ```
@@ -38,7 +38,7 @@ Usage: rivum [OPTION...] [FILE]
 ## Supported report types
 
 As of now, only the CSV input that is created with [ThreadFix' CLI importer](https://github.com/denimgroup/threadfix/wiki/CLI-Importers) is supported.
-Futhermore, the CSV file needs to be preprocessed (see `examples/prep.awk`).
+Furthermore, the CSV file needs to be preprocessed (see `examples/prep.awk`).
 The rare entries without a CWE ID are passed through unchanged.
 
-RIVUM is copyright © 2015 Fraunhofer AISEC, and released to the public under the terms of the MIT license.
+AVUS is copyright © 2015 Fraunhofer AISEC, and released to the public under the terms of the MIT license.
