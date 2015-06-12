@@ -5,7 +5,7 @@ module Avus
     , defaultConfig
     ) where
 
-import Paths_rivum (version)
+import Paths_avus (version)
 import qualified Avus.CVSSv2 as CVSS
 import qualified Avus.Scan as Scan
 
@@ -92,7 +92,7 @@ defaultConfig = Config
     , err        = Nothing
     }
 
--- | Quasi-main function that is used to run rivum in a user-specified way
+-- | Quasi-main function that is used to run avus in a user-specified way
 --   See `examples/avus.hs`.
 processScan :: Config -> IO ()
 processScan = Dyre.wrapMain Dyre.defaultParams

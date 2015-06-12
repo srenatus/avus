@@ -6,10 +6,14 @@ WORKDIR /opt/avus
 # update src and test, run tests
 ADD avus.cabal /opt/avus/
 ADD src /opt/avus/src
+ADD src-exec /opt/avus/src-exec
 ADD test /opt/avus/test
 ADD examples /opt/avus/examples
 RUN cabal test
 RUN cabal build && cabal install
 
 WORKDIR /opt/avus/examples
-RUN avus "sample.csv" --dyre-debug
+RUN avus sample.csv --dyre-debug
+
+RUN avus sample.csv > new.csv
+RUN diff -u sample.csv new.csv || exit 0

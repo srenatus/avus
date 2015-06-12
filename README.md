@@ -1,6 +1,6 @@
 # AVUS tool
 
-[![Build Status](https://travis-ci.org/srenatus/rivum.svg)](https://travis-ci.org/srenatus/rivum)
+[![Build Status](https://travis-ci.org/REDACTED/avus.svg)](https://travis-ci.org/REDACTED/avus)
 
 This tool allows for re-evaluating a list of vulnerability findings.
 It does that by providing the basic infrastructure for

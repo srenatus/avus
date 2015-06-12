@@ -1,6 +1,6 @@
 module Main where
 
-import Rivum
+import Avus
 
 main = processScan defaultConfig
 --main = putStrLn "please supply config"
