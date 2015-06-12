@@ -1,10 +1,11 @@
-module Rivum.CWE 
+-- | CWE functions and data
+module Avus.CWE
     ( Id
     , cweImpact
     ) where
 
+import Avus.CVSSv2 (Base(..), Imp(..))
 import Data.List (elem)
-import Rivum.CVSS (Base(..), Imp(..))
 
 type Id = Int
 
@@ -13,7 +14,7 @@ type Id = Int
 
 partialConf :: [Id]
 partialConf =
-    [ 
+    [
     103, 104, 108, 257, 330, 483, 656, 768, 782, 783,
     923, 924
     ]

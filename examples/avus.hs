@@ -1,8 +1,8 @@
 {-# LANGUAGE NamedFieldPuns #-}
 -- module Main where
-import Rivum (processScan, defaultConfig, Config(..))
-import Rivum.CVSS (Req(..), Base(..), Env(..), Av(..), Ac(..), Au(..))
-import Rivum.Utils (returnIO)
+import Avus (processScan, defaultConfig, Config(..))
+import Avus.CVSSv2 (Req(..), Base(..), Env(..), Av(..), Ac(..), Au(..))
+import Avus.Utils (returnIO)
 import System.FilePath (FilePath)
 
 -- Confidentiality, Integrity, Availability
@@ -26,10 +26,10 @@ classify fp
     misc     = ["sh.c", "init.c"]
     drop     = ["stressfs.c", "usertests.c", "forktest.c"]
 
-concept :: SecurityConcept -- NB: this is dom_config1 for findings w/ dupes
+concept :: SecurityConcept
 concept Userland = Requirements (ReqL, ReqL, ReqL)
-concept Misc     = Requirements (ReqL, ReqL, ReqL)
-concept Kernel   = Requirements (ReqL, ReqL, ReqM)
+concept Misc     = Requirements (ReqL, ReqH, ReqL)
+concept Kernel   = Requirements (ReqL, ReqL, ReqL)
 
 -- ignores the filepath, sets project-level parameters
 xv6base :: FilePath -> Base -> Base

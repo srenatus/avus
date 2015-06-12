@@ -1,10 +1,15 @@
 # build from an image with cabal dependencies installed (saves time)
-FROM rivum:dev
+FROM avus:dev
 
-WORKDIR /opt/rivum
+WORKDIR /opt/avus
 
 # update src and test, run tests
-ADD rivum.cabal /opt/rivum/
-ADD src /opt/rivum/src
-ADD test /opt/rivum/test
+ADD avus.cabal /opt/avus/
+ADD src /opt/avus/src
+ADD test /opt/avus/test
+ADD examples /opt/avus/examples
 RUN cabal test
+RUN cabal build && cabal install
+
+WORKDIR /opt/avus/examples
+RUN avus "sample.csv" --dyre-debug

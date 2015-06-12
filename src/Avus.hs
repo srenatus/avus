@@ -1,24 +1,23 @@
 {-# LANGUAGE NamedFieldPuns #-}
-module Rivum
+module Avus
     ( Config(..)
     , processScan
     , defaultConfig
     ) where
 
-import qualified Config.Dyre as Dyre
-import qualified Config.Dyre.Options as Dyre
-import Config.Dyre.Relaunch
-import Data.Maybe (fromMaybe)
-
 import Paths_rivum (version)
-import Data.Version (showVersion)
+import qualified Avus.CVSSv2 as CVSS
+import qualified Avus.Scan as Scan
 
-import System.FilePath
-import System.Exit (exitSuccess, exitFailure)
-import System.Environment (getArgs)
-import System.Console.GetOpt
-import qualified Rivum.CVSS as CVSS
-import qualified Rivum.Scan as Scan
+import qualified Config.Dyre          as Dyre
+import qualified Config.Dyre.Options  as Dyre
+import           Config.Dyre.Relaunch
+import           Data.Maybe (fromMaybe)
+import           Data.Version (showVersion)
+import           System.FilePath
+import           System.Exit (exitSuccess, exitFailure)
+import           System.Environment (getArgs)
+import           System.Console.GetOpt
 
 -- | Config data type
 --   Includes update functions for the CVSS configurations and an error value,
@@ -44,7 +43,7 @@ getOpts argv = case getOpt Permute opts argv of
     (o, r, [])   -> return (o, r)
     (_, _, errs) -> ioError (userError (concat errs ++ usageInfo header opts))
   where
-    header = "Usage: rivum [OPTION...] [FILE]"
+    header = "Usage: avus [OPTION...] [FILE]"
 
 findOutput :: [Flag] -> Maybe String
 findOutput ((Output x):_) = x
@@ -94,10 +93,10 @@ defaultConfig = Config
     }
 
 -- | Quasi-main function that is used to run rivum in a user-specified way
---   See `examples/rivum.hs`.
+--   See `examples/avus.hs`.
 processScan :: Config -> IO ()
 processScan = Dyre.wrapMain Dyre.defaultParams
-      { Dyre.projectName = "rivum"
+      { Dyre.projectName = "avus"
       , Dyre.realMain    = realMain
       , Dyre.showError   = showError
       }

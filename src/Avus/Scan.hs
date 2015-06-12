@@ -1,10 +1,13 @@
 -- | Scan reading and processing module
 {-# LANGUAGE OverloadedStrings, DeriveGeneric #-}
-module Rivum.Scan
+module Avus.Scan
     ( processData
     , processVuln
     , Vuln
     )where
+
+import qualified Avus.CWE as CWE
+import qualified Avus.CVSSv2 as CVSS
 
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Lazy.Char8 as B
@@ -14,9 +17,6 @@ import Data.Traversable (mapM)
 import Data.Csv (ToNamedRecord, FromNamedRecord, Header, encodeByNameWith, defaultEncodeOptions, EncodeOptions(..))
 import Data.Csv.Streaming
 import GHC.Generics
-
-import qualified Rivum.CWE as CWE
-import qualified Rivum.CVSS as CVSS
 
 -- | Vulnerability data
 --   processed by processData

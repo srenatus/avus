@@ -1,6 +1,6 @@
 -- | CVSS functions
 {-# LANGUAGE NamedFieldPuns #-}
-module Rivum.CVSS (
+module Avus.CVSSv2 (
   -- * Basic types
     Score
   , Severity
