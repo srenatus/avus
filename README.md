@@ -41,4 +41,4 @@ As of now, only the CSV input that is created with [ThreadFix' CLI importer](htt
 Furthermore, the CSV file needs to be preprocessed (see `examples/prep.awk`).
 The rare entries without a CWE ID are passed through unchanged.
 
-AVUS is copyright © 2015 Fraunhofer AISEC, and released to the public under the terms of the MIT license.
+AVUS is copyright © 2015 REDACTED, and released to the public under the terms of the MIT license.
