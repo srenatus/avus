@@ -1,4 +1,5 @@
 import Avus.Scan
+import Criterion.Types
 import Criterion.Main
 
 noopProcessData :: FilePath -> IO ()
@@ -8,9 +9,10 @@ noopProcessData fp = processData (Just fp) (Just "null") $
               (\_ e -> return e)
 
 main :: IO ()
-main = defaultMain [
-  bgroup "noop" [
-    bench "noopProcessData 20" $ nfIO (noopProcessData "benchmark/sample.csv"),
-    bench "noopProcessData 200" $ nfIO (noopProcessData "benchmark/sample200.csv")
+main = defaultMainWith
+  (defaultConfig {reportFile = Just "noop-criterion.html"})
+  [ bgroup "noop"
+    [ bench "noopProcessData 20" $ nfIO (noopProcessData "benchmark/sample.csv")
+    , bench "noopProcessData 200" $ nfIO (noopProcessData "benchmark/sample200.csv")
     ]
   ]
