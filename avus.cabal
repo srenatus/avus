@@ -67,3 +67,15 @@ test-suite quickcheck
                        derive >= 2.5,
                        avus
   default-language:    Haskell2010
+
+benchmark avus-benchmark
+  build-depends:    base,
+                    criterion >= 1.1.0.0,
+                    QuickCheck >= 2.8.1,
+                    derive >= 2.5,
+                    avus
+  default-language: Haskell2010
+  ghc-options:      -Wall
+  hs-source-dirs:   benchmark
+  main-is:          AvusBenchmark.hs
+  type:             exitcode-stdio-1.0
