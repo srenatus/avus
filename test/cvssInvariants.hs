@@ -1,6 +1,6 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TemplateHaskell #-}
-import Test.QuickCheck
+
 import Test.QuickCheck
 import Data.DeriveTH
 import Avus.CVSSv2
