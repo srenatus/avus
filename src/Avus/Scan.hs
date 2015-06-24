@@ -3,7 +3,7 @@
 module Avus.Scan
     ( processData
     , processVuln
-    , Vuln
+    , Vuln(..)
     )where
 
 import qualified Avus.CWE as CWE
