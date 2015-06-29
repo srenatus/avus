@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-For using avus, a Haskell installation is needed, for example using [Haskell Platform](https://www.haskell.org/platform/).
+For using avus, a Haskell installation is needed, for example using [Haskell Platform](https://www.haskell.org/platform/), or [MinGHC](https://github.com/fpco/minghc).
 Having obtained it, run `cabal update` to update cabal's package list.
 
 ## Install avus
