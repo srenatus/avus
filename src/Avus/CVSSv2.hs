@@ -1,4 +1,5 @@
 -- | CVSS functions
+{-# LANGUAGE DeriveGeneric  #-}
 {-# LANGUAGE NamedFieldPuns #-}
 module Avus.CVSSv2 (
   -- * Basic types
@@ -31,7 +32,8 @@ module Avus.CVSSv2 (
   , fromSeverity
   ) where
 
-import Data.Decimal (Decimal, roundTo)
+import           Data.Decimal (Decimal, roundTo)
+import           GHC.Generics
 
 -- | Score data type
 --
@@ -226,7 +228,13 @@ data Req = ReqND  -- ^ not defined
          | ReqL   -- ^ low
          | ReqM   -- ^ medium
          | ReqH   -- ^ high
-           deriving (Eq, Show)
+           deriving (Eq, Generic)
+
+instance Show Req where
+   show ReqND = "ND"
+   show ReqL = "L"
+   show ReqM = "M"
+   show ReqH = "H"
 
 fromCdp :: Cdp -> Decimal
 fromCdp CdpND = 0.0
@@ -238,6 +246,7 @@ fromCdp CdpH  = 0.5
 
 fromTd :: Td -> Decimal
 fromTd TdND = 1.0
+fromTd TdN = 0.0
 fromTd TdL  = 0.25
 fromTd TdM  = 0.75
 fromTd TdH  = 1.0
