@@ -5,19 +5,15 @@ module Avus
     , defaultConfig
     ) where
 
-import Paths_avus (version)
-import qualified Avus.CVSSv2 as CVSS
-import qualified Avus.Scan as Scan
+import qualified Avus.CVSSv2           as CVSS
+import qualified Avus.Scan             as Scan
+import           Paths_avus            (version)
 
-import qualified Config.Dyre          as Dyre
-import qualified Config.Dyre.Options  as Dyre
-import           Config.Dyre.Relaunch
-import           Data.Maybe (fromMaybe)
-import           Data.Version (showVersion)
-import           System.FilePath
-import           System.Exit (exitSuccess, exitFailure)
-import           System.Environment (getArgs)
+import qualified Config.Dyre           as Dyre
+import           Data.Version          (showVersion)
 import           System.Console.GetOpt
+import           System.Environment    (getArgs)
+import           System.Exit           (exitFailure, exitSuccess)
 
 -- | Config data type
 --   Includes update functions for the CVSS configurations and an error value,
@@ -46,14 +42,14 @@ getOpts argv = case getOpt Permute opts argv of
     header = "Usage: avus [OPTION...] [FILE]"
 
 findOutput :: [Flag] -> Maybe String
-findOutput ((Output x):_) = x
+findOutput (Output x:_) = x
 findOutput (_:xs)         = findOutput xs
 findOutput []             = Nothing
 
 outputVersion :: Maybe String -> IO ()
 outputVersion ref = putStr versionString
   where
-    versionString = (showVersion version) ++ addedRef ref
+    versionString = showVersion version ++ addedRef ref
     addedRef (Just r) = "/" ++ r
     addedRef Nothing    = ""
 

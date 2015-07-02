@@ -29,7 +29,6 @@ module Avus.CVSSv2 (
   , defaultEnv
   -- * Helper functions
   , fromScore
-  , fromSeverity
   ) where
 
 import           Data.Decimal (Decimal, roundTo)
@@ -96,6 +95,7 @@ data Base = Base
     } deriving (Eq, Show)
 
 -- | Default base score configuration
+defaultBase :: Base
 defaultBase = Base
     { av = AvL
     , ac = AcH
@@ -183,6 +183,7 @@ data Temp = Temp
     } deriving (Eq, Show)
 
 -- | Default temp configuration: not defined
+defaultTemp :: Temp
 defaultTemp = Temp
     { e  = END
     , rl = RlND
@@ -267,6 +268,7 @@ data Env = Env
     } deriving (Eq, Show)
 
 -- | Default Env configuration: not defined
+defaultEnv :: Env
 defaultEnv = Env
     { cdp = CdpND
     , td  = TdND
@@ -294,7 +296,7 @@ env b@(Base { c, i, a}) t  (Env { cdp, td, cr, ir, ar }) = roundTo 1 $ (adjusted
     availReq = fromReq ar
 
 -- | NVD classification
-data Severity = Low | Medium | High
+data Severity = Low | Medium | High deriving (Eq, Show)
 
 -- | Convert a Score into a Severity
 fromScore :: Score -> Severity
@@ -302,9 +304,3 @@ fromScore s
     | s <= 3.9  = Low
     | s <= 6.9  = Medium
     | otherwise = High
-
--- | Convert a Severity in its String representation
-fromSeverity :: Severity -> String
-fromSeverity Low = "Low"
-fromSeverity Medium = "Medium"
-fromSeverity High = "High"

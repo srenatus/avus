@@ -1,6 +1,6 @@
 module Main where
 
-import Avus
+import           Avus
 
+main :: IO ()
 main = processScan defaultConfig
---main = putStrLn "please supply config"

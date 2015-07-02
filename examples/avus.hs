@@ -1,9 +1,10 @@
 {-# LANGUAGE NamedFieldPuns #-}
 -- module Main where
-import Avus (processScan, defaultConfig, Config(..))
-import Avus.CVSSv2 (Req(..), Base(..), Env(..), Av(..), Ac(..), Au(..))
-import Avus.Utils (returnIO)
-import System.FilePath (FilePath)
+import           Avus            (Config (..), defaultConfig, processScan)
+import           Avus.CVSSv2     (Ac (..), Au (..), Av (..), Base (..),
+                                  Env (..), Req (..))
+import           Avus.Utils      (returnIO)
+import           System.FilePath (FilePath)
 
 -- Confidentiality, Integrity, Availability
 data Requirements = Requirements (Req, Req, Req)

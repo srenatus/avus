@@ -1,22 +1,27 @@
 -- | Scan reading and processing module
-{-# LANGUAGE OverloadedStrings, DeriveGeneric #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Avus.Scan
     ( processData
     , processVuln
     , Vuln(..)
     )where
 
-import qualified Avus.CWE as CWE
-import qualified Avus.CVSSv2 as CVSS
+import qualified Avus.CVSSv2                as CVSS
+import qualified Avus.CWE                   as CWE
 
-import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString.Lazy       as BL
 import qualified Data.ByteString.Lazy.Char8 as B
-import Prelude hiding (mapM, putStr)
-import Data.Foldable (for_)
-import Data.Traversable (mapM)
-import Data.Csv (ToNamedRecord, FromNamedRecord, Header, encodeByNameWith, defaultEncodeOptions, EncodeOptions(..))
-import Data.Csv.Streaming
-import GHC.Generics
+import           Data.Csv                   (EncodeOptions (..),
+                                             FromNamedRecord, Header,
+                                             ToNamedRecord,
+                                             defaultEncodeOptions,
+                                             encodeByNameWith)
+import           Data.Csv.Streaming
+import           Data.Foldable              (for_)
+import           Data.Traversable           (mapM)
+import           GHC.Generics
+import           Prelude                    hiding (mapM, putStr)
 
 -- | Vulnerability data
 --   processed by processData
@@ -60,7 +65,6 @@ processData :: Maybe FilePath  -- input, scan file
 processData fp out f = do
     csvData <- readData fp
     let (Right (hdr, rs)) = decodeByName csvData :: Either String (Header, Records Vuln)
-    mapM f rs
     vs <- mapM f rs -- :: Records Vuln
     for_ vs (\x -> putStr out $ encodeByNameWith encodeOpts hdr [x])
     -- putStrLn "done"
@@ -79,11 +83,11 @@ processVuln :: (FilePath -> CVSS.Base -> IO CVSS.Base)
             -> (FilePath -> CVSS.Env -> IO CVSS.Env)
             -> Vuln
             -> IO Vuln
-processVuln baseUpdate tempUpdate envUpdate v@(Vuln vid n g cn (Just cweId) s file p pm l ) = do
-    base <- baseUpdate file $ CWE.cweImpact cweId CVSS.defaultBase
-    temp <- tempUpdate file CVSS.defaultTemp
-    env  <- envUpdate file CVSS.defaultEnv
-    let score    = CVSS.env base temp env
-        severity = CVSS.fromSeverity $ CVSS.fromScore score
-    return (Vuln vid n g cn (Just cweId) severity file p pm l)
+processVuln baseUpdate tempUpdate envUpdate (Vuln vid n g cn (Just cweId) _ filepath p pm l ) = do
+    base <- baseUpdate filepath $ CWE.cweImpact cweId CVSS.defaultBase
+    temp <- tempUpdate filepath CVSS.defaultTemp
+    env  <- envUpdate filepath CVSS.defaultEnv
+    let score = CVSS.env base temp env
+        sev   = show $ CVSS.fromScore score
+    return (Vuln vid n g cn (Just cweId) sev filepath p pm l)
 processVuln _ _ _ v = return v

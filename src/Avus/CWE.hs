@@ -4,8 +4,7 @@ module Avus.CWE
     , cweImpact
     ) where
 
-import Avus.CVSSv2 (Base(..), Imp(..))
-import Data.List (elem)
+import           Avus.CVSSv2 (Base (..), Imp (..))
 
 type Id = Int
 
