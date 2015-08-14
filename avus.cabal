@@ -9,16 +9,16 @@ description:         AVUS allows for re-evaluating findings produced by
                      analysis tools, using user-provided update functions.
 
                      More details and an example project can be found on
-                     https://github.com/REDACTED/avus
+                     https://github.com/srenatus/avus
 
-homepage:            https://github.com/REDACTED/avus
-bug-reports:         https://github.com/REDACTED/avus/issues
+homepage:            https://github.com/srenatus/avus
+bug-reports:         https://github.com/srenatus/avus/issues
 
 license:             MIT
 license-file:        LICENSE
-author:              REDACTED
-maintainer:          REDACTED
-copyright:           (c) 2015 REDACTED
+author:              Stephan Renatus
+maintainer:          stephan.renatus@aisec.fraunhofer.de
+copyright:           (c) 2015 Fraunhofer AISEC
 category:            Security
 build-type:          Simple
 -- extra-source-files:
@@ -26,7 +26,7 @@ cabal-version:       >=1.10
 
 source-repository head
   type:              git
-  location:          git://github.com/REDACTED/avus.git
+  location:          git://github.com/srenatus/avus.git
 
 library
   hs-source-dirs:      src
