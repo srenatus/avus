@@ -8,7 +8,7 @@ Having obtained it, run `cabal update` to update cabal's package list.
 ## Install avus
 
 ```
-git clone git://github.com/REDACTED/avus
+git clone git://github.com/srenatus/avus
 cd avus
 cabal install
 ```
